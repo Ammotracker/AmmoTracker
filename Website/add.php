@@ -1,64 +1,64 @@
 <?php
-
 include 'header.php';
 
+// Get the action from GET or POST, fallback to empty string if not set
+$act = $_GET['act'] ?? $_POST['act'] ?? '';
 
-IF(!$_GET['act']==''){
-	$act = $_GET['act'];
-}ELSE{
-	$act = $_POST['act'];
-}
+// Handle the 'add' action
+if ($act === 'add') {
+	// Retrieve POST data
+	$upc = $_POST['UPC'] ?? '';
+	$manf = $_POST['Manufacturer'] ?? '';
+	$name = $_POST['Name'] ?? '';
+	$qty = $_POST['qty'] ?? '';
+	$caliber = $_POST['caliber'] ?? '';
+	$grain = $_POST['grain'] ?? '';
+	$bullet = $_POST['bullet'] ?? '';
 
-
-if ($act=='add'){
-	$upc = $_POST['UPC'];
-	$manf = $_POST['Manufacturer'];
-	$name = $_POST['Name'];
-	$qty = $_POST['qty'];
-	$caliber = $_POST['caliber'];
-	$grain = $_POST['grain'];
-	$bullet = $_POST['bullet'];
-	
-	if($upc==''){
+	// Check if the UPC is provided
+	if ($upc === '') {
 		echo "Field left blank";
+	} else {
+		// Check if the UPC already exists in the database
+		$sql1 = "SELECT * FROM upc_main WHERE upc = '$upc'";
+		$Query = mysqli_query($conn, $sql1);
+
+		if (mysqli_num_rows($Query) === 0) {
+			// If the UPC doesn't exist, insert it into both tables
+			$sql2 = "INSERT INTO upc_main (upc, qty) VALUES ('$upc', '0')";
+			mysqli_query($conn, $sql2);
+
+			$sql3 = "INSERT INTO upc_detail (upc, caliber, qtybox, bullettype, manufacturer, name, grain) 
+					 VALUES ('$upc', '$caliber', '$qty', '$bullet', '$manf', '$name', '$grain')";
+			mysqli_query($conn, $sql3);
+
+			echo "Added to database";
+		} else {
+			echo "Already in the database";
+		}
 	}
-	
-	$sql1="Select * from upc_main where upc= '$upc'";
-	
-	$Query = mysqli_query ($conn, $sql1);
-	
-	if(mysqli_num_rows($Query) == 0 && !$upc==''){
-		$sql2 = "Insert into upc_main (upc, qty) Values ('$upc', '0')";
-		mysqli_query ($conn, $sql2);
-		$sql3="Insert into upc_detail (upc, caliber, qtybox, bullettype, manufacturer, name, grain) Values ('$upc', '$caliber', '$qty', '$bullet', '$manf', '$name', '$grain')";
-		mysqli_query ($conn, $sql3);
-		echo "Added to database";
-	}else{
-		echo "Already in the database";
-	}
-	
 }
-	?>
-	<form action="add.php" method="post" class="submit">
-		<Table>
+?>
+
+<form action="add.php" method="post" class="submit">
+	<table>
 		<tr>
-			<TD> Manufacturer </TD>
-			<TD> Product Name </TD>
-			<TD> Qty per box</TD>
-			<TD> Caliber</TD>
-			<TD> Grain</TD>
-			<TD> Bullet Type</TD>
-			<td >UPC</td>
+			<td>Manufacturer</td>
+			<td>Product Name</td>
+			<td>Qty per box</td>
+			<td>Caliber</td>
+			<td>Grain</td>
+			<td>Bullet Type</td>
+			<td>UPC</td>
 		</tr>
-		<TR>
-			
+		<tr>
 			<td><input type="text" name="Manufacturer" autofocus onfocus="this.select()"></td>
 			<td><input type="text" name="Name"></td>
 			<td><input type="text" name="qty"></td>
 			<td><input type="text" name="caliber"></td>
 			<td><input type="text" name="grain"></td>
 			<td>
-				<select type="select" name="bullet">
+				<select name="bullet">
 					<option value="FMJ">FMJ</option>
 					<option value="HP">HP</option>
 					<option value="Shot">Shot</option>
@@ -69,12 +69,12 @@ if ($act=='add'){
 			</td>
 			<td><input type="text" name="UPC"></td>
 		</tr>
-		</table>
-				<BR>
-				<BR>
-	<!--the hidden post action-->
-			<input type="hidden" id="act" name="act" value="add">
-			<input type="submit">
-			</form>
-			<A href='index.php'>Home</A>
+	</table>
 
+	<br><br>
+
+	<!-- Hidden input to track the action -->
+	<input type="hidden" id="act" name="act" value="add">
+	<input type="submit" value="Add">
+</form>
+<a href="index.php">Home</a>
