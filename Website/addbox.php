@@ -1,82 +1,83 @@
 <?php
-
+// Include the header file
 include 'header.php';
 
-?>
-	<head>
-	<style>
-		body {
-			transition: background-color .5s ease;
-		}
-	</style>
-</head>
-<?php
+// Set the background color default to white
+$backgroundColor = 'white';
 
-IF(!$_GET['act']==''){
-	$act = $_GET['act'];
-}ELSE{
-	$act = $_POST['act'];
-}
+// Get the action from GET or POST
+$act = $_GET['act'] ?? $_POST['act'] ?? '';
 
+// Handle the 'add' action
+if ($act === 'add') {
+	$upc = $_POST['UPC'] ?? '';
 
-if ($act=='add'){
-	$upc = $_POST['UPC'];
+	// Check if UPC is provided
+	if ($upc) {
+		$sql1 = "SELECT * FROM upc_main WHERE upc = '$upc'";
+		$Query = mysqli_query($conn, $sql1);
 
-	
-	$sql1="Select * from upc_main where upc= '$upc'";
-	
-	$Query = mysqli_query ($conn, $sql1);
-	
-	if(mysqli_num_rows($Query) == 0){
-		print ("Not found in database");
-		$backgroundColor = 'red';
-		
-	}else{
-		
-		$backgroundColor = 'green';
-		$qtyonhand = mysqli_num_rows($Query);
-		$sql3="UPDATE upc_main SET qty = qty + 1 WHERE upc = '$upc'";
-		//echo $sql3;
-		mysqli_query ($conn, $sql3);
-		echo "Added";
-		echo "<BR><BR>";
-		while($row3 = mysqli_fetch_array($Query)){
-			$rowcount = $row3['qty'] + 1;
-			echo $rowcount." Boxes on hand";
+		// Check if UPC is found in the database
+		if (mysqli_num_rows($Query) === 0) {
+			$backgroundColor = 'red'; // Set background to red if not found
+			echo "Not found in database";
+		} else {
+			$backgroundColor = 'green'; // Set background to green if found
+			$qtyonhand = mysqli_num_rows($Query);
+			$sql3 = "UPDATE upc_main SET qty = qty + 1 WHERE upc = '$upc'";
+			mysqli_query($conn, $sql3); // Update the database
+
+			echo "Added<br><br>";
+			while ($row3 = mysqli_fetch_array($Query)) {
+				$rowcount = $row3['qty'] + 1;
+				echo "$rowcount Boxes on hand";
+			}
 		}
 	}
 }
-	
-	?>
-
-	<body bgcolor="<?= $backgroundColor; ?>" onload="changeBackgroundColor()">
-	
-		<script>
-			function changeBackgroundColor() {
-				setTimeout(function() {
-					document.body.style.backgroundColor = "white"; // Change to white after 5 seconds
-				}, 1500); // 1500ms = 1.5 seconds
-			}
-		</script>
-	
-
-	<form action="addbox.php" method="post" class="submit">
-		<Table>
-		<tr>
-			<td >UPC</td>
-		</tr>
-		<TR>
-			<td><input type="text" name="UPC" autofocus onfocus="this.select()"></td>
-		</tr>
-		</table>
-				<BR>
-				<BR>
-	<!--the hidden post action-->
-			<input type="hidden" id="act" name="act" value="add">
-			<input type="submit">
-			</form>
-			<A href='index.php'>Home</A></body>
-<?php		
-
 ?>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>UPC Management</title>
+	<style>
+		body {
+			transition: background-color 0.5s ease;
+		}
+	</style>
+	<script>
+		// Function to change the background color to white after 1.5 seconds
+		function changeBackgroundColor() {
+			setTimeout(function() {
+				document.body.style.backgroundColor = "white";
+			}, 1500);
+		}
+	</script>
+</head>
+<body bgcolor="<?= $backgroundColor; ?>" onload="changeBackgroundColor()">
+
+	<h2>UPC Management</h2>
+	
+	<!-- Form for adding box -->
+	<form action="addbox.php" method="post">
+		<table>
+			<tr>
+				<td>UPC</td>
+			</tr>
+			<tr>
+				<td><input type="text" name="UPC" autofocus onfocus="this.select()"></td>
+			</tr>
+		</table>
+		<br><br>
+		<input type="hidden" id="act" name="act" value="add">
+		<input type="submit" value="Add Box">
+	</form>
+	
+	<br>
+	<a href="index.php">Home</a>
+
+</body>
+</html>
