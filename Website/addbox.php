@@ -2,6 +2,15 @@
 
 include 'header.php';
 
+?>
+	<head>
+	<style>
+		body {
+			transition: background-color .5s ease;
+		}
+	</style>
+</head>
+<?php
 
 IF(!$_GET['act']==''){
 	$act = $_GET['act'];
@@ -20,20 +29,37 @@ if ($act=='add'){
 	
 	if(mysqli_num_rows($Query) == 0){
 		print ("Not found in database");
+		$backgroundColor = 'red';
 		
 	}else{
+		
+		$backgroundColor = 'green';
 		$qtyonhand = mysqli_num_rows($Query);
 		$sql3="UPDATE upc_main SET qty = qty + 1 WHERE upc = '$upc'";
 		//echo $sql3;
 		mysqli_query ($conn, $sql3);
 		echo "Added";
 		echo "<BR><BR>";
-		echo $qtyonhand." Boxes on hand";
+		while($row3 = mysqli_fetch_array($Query)){
+			$rowcount = $row3['qty'] + 1;
+			echo $rowcount." Boxes on hand";
+		}
 	}
 }
 	
 	?>
+
+	<body bgcolor="<?= $backgroundColor; ?>" onload="changeBackgroundColor()">
 	
+		<script>
+			function changeBackgroundColor() {
+				setTimeout(function() {
+					document.body.style.backgroundColor = "white"; // Change to white after 5 seconds
+				}, 1500); // 1500ms = 1.5 seconds
+			}
+		</script>
+	
+
 	<form action="addbox.php" method="post" class="submit">
 		<Table>
 		<tr>
@@ -49,7 +75,7 @@ if ($act=='add'){
 			<input type="hidden" id="act" name="act" value="add">
 			<input type="submit">
 			</form>
-			<A href='index.php'>Home</A>
+			<A href='index.php'>Home</A></body>
 <?php		
 
 ?>
